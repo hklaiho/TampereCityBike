@@ -29,6 +29,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 
 import fi.tamk.ratboyz.tamperecitybike.R;
+import fi.tamk.ratboyz.tamperecitybike.utils.ParkDataGetter;
 
 
 public class MapFragment extends Fragment implements GoogleMap.OnMapClickListener, GoogleMap.OnCameraMoveStartedListener {
@@ -55,6 +56,8 @@ public class MapFragment extends Fragment implements GoogleMap.OnMapClickListene
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout
         View rootView = inflater.inflate(R.layout.content_map_fragment, container, false);
+
+        new ParkDataGetter().execute();
 
         // Establish a connection to google services if no connection exists,
         if (mGoogleApiClient == null) {
@@ -217,8 +220,7 @@ public class MapFragment extends Fragment implements GoogleMap.OnMapClickListene
                         , null);
             }
         } else {
-            // Request to enable location service.
-            // TODO only a dialog asking for permission, and not starting a new activity.
+            // Open activity which controls location service.
             if (isAdded()) {
                 Toast.makeText(getContext(), getString(R.string.message_enable_location_info), Toast.LENGTH_LONG).show();
                 Intent locationIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
