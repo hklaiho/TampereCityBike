@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="settings_default_update_interval">2000</integer>
+
+    <!-- Info regards to zoom levels, refer to Google's documentation -->
+    <integer name="map_default_zoom">11</integer>
+    <integer name="map_on_locate_user_zoom">14</integer>
+
+    <!-- Unit of measurement is ms -->
+    <integer name="map_on_locate_user_animation_speed">700</integer>
+</resources>
