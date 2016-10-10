@@ -18,6 +18,8 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -29,7 +31,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 
 import fi.tamk.ratboyz.tamperecitybike.R;
-import fi.tamk.ratboyz.tamperecitybike.utils.ParkDataGetter;
+import fi.tamk.ratboyz.tamperecitybike.utils.BikeParkDataFetcher;
 
 
 public class MapFragment extends Fragment implements GoogleMap.OnMapClickListener, GoogleMap.OnCameraMoveStartedListener {
@@ -42,6 +44,14 @@ public class MapFragment extends Fragment implements GoogleMap.OnMapClickListene
 
     public static final String TAG = "fi.tamk.ratboyz.tamperecitybike.MapFragment";
 
+    /**
+     * Is the preferred way of programmatically creating a MapFragment object.
+     * <p>
+     * Adds necessary bundle arguments upon fragment creation. As of now
+     * none are needed. Constructor is present for future proofing reasons.
+     *
+     * @return A new MapFragment object.
+     */
     public static MapFragment newInstance() {
         return new MapFragment();
     }
@@ -56,8 +66,6 @@ public class MapFragment extends Fragment implements GoogleMap.OnMapClickListene
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout
         View rootView = inflater.inflate(R.layout.content_map_fragment, container, false);
-
-        new ParkDataGetter().execute();
 
         // Establish a connection to google services if no connection exists,
         if (mGoogleApiClient == null) {
@@ -95,10 +103,10 @@ public class MapFragment extends Fragment implements GoogleMap.OnMapClickListene
                     map.setMyLocationEnabled(true);
                 }
                 // Padding has to be added since the status bar is translucent.
-                // TODO do not add padding if statusbar isnt translucent.
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP)
-                    adjustMapPadding(map);
-
+                if (isTranslucentStatusBar()) {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP)
+                        adjustMapPadding(map);
+                }
                 // Fetch default map position. Some gymnastics are required as
                 // doubles are not directly supported in the xml resources.
                 Resources res = getResources();
@@ -116,6 +124,7 @@ public class MapFragment extends Fragment implements GoogleMap.OnMapClickListene
                 // for hiding and showing floating action buttons.
                 map.setOnMapClickListener(MapFragment.this);
                 map.setOnCameraMoveStartedListener(MapFragment.this);
+                new BikeParkDataFetcher(map).execute();
             }
         });
 
@@ -140,6 +149,24 @@ public class MapFragment extends Fragment implements GoogleMap.OnMapClickListene
         );
     }
 
+    /**
+     * Checks if translucent status bar is enabled.
+     * <p>
+     * Not tested on low API level devices.
+     *
+     * @return Is the status bar translucent.
+     */
+    protected boolean isTranslucentStatusBar() {
+        if (isAdded()) {
+            Window w = getActivity().getWindow();
+            WindowManager.LayoutParams lp = w.getAttributes();
+            int flags = lp.flags;
+            // Compare Translucent Status Bar with flags in the window
+            return ((flags & WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS) == WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        } else {
+            return false;
+        }
+    }
 
     @Override
     public void onResume() {
@@ -220,7 +247,7 @@ public class MapFragment extends Fragment implements GoogleMap.OnMapClickListene
                         , null);
             }
         } else {
-            // Open activity which controls location service.
+            // Open activity which controls location service, if the service is disabled.
             if (isAdded()) {
                 Toast.makeText(getContext(), getString(R.string.message_enable_location_info), Toast.LENGTH_LONG).show();
                 Intent locationIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
@@ -247,6 +274,8 @@ public class MapFragment extends Fragment implements GoogleMap.OnMapClickListene
             }
 
             isAvailable = (locationMode != Settings.Secure.LOCATION_MODE_OFF);
+
+            // Backwards compatibility, disregard deprecated errors.
         } else {
             locationProviders = Settings.Secure.getString(getContext().getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
             isAvailable = !TextUtils.isEmpty(locationProviders);
