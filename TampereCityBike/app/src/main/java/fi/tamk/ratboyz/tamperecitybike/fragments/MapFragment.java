@@ -102,7 +102,7 @@ public class MapFragment extends Fragment implements GoogleMap.OnMapClickListene
                         ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
                     map.setMyLocationEnabled(true);
                 }
-                // Padding has to be added since the status bar is translucent.
+                // Padding has to be added if the status bar is translucent.
                 if (isTranslucentStatusBar()) {
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP)
                         adjustMapPadding(map);
@@ -229,31 +229,7 @@ public class MapFragment extends Fragment implements GoogleMap.OnMapClickListene
      * Attempts to zoom the map on the user's last known location.
      */
     public void panToCurrentLocation() {
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // If permissions are not given already, request them.
-            ActivityCompat.requestPermissions(getActivity()
-                    , new String[]{Manifest.permission.ACCESS_FINE_LOCATION}
-                    , REQUEST_CODE_LOCATION);
 
-        } else if (locationServiceIsEnabled()) {
-            // If settings permit and location is found, focus on the current location.
-            map.setMyLocationEnabled(true);
-            Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                    mGoogleApiClient);
-            if (mLastLocation != null) {
-                LatLng position = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(position, getResources().getInteger(R.integer.map_on_locate_user_zoom))
-                        , getResources().getInteger(R.integer.map_on_locate_user_animation_speed)
-                        , null);
-            }
-        } else {
-            // Open activity which controls location service, if the service is disabled.
-            if (isAdded()) {
-                Toast.makeText(getContext(), getString(R.string.message_enable_location_info), Toast.LENGTH_LONG).show();
-                Intent locationIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                getActivity().startActivity(locationIntent);
-            }
-        }
     }
 
     /**
