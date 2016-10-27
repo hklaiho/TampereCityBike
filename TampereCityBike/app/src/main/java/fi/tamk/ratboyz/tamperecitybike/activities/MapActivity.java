@@ -10,15 +10,26 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.OptionalPendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -30,10 +41,12 @@ import fi.tamk.ratboyz.tamperecitybike.R;
 import fi.tamk.ratboyz.tamperecitybike.utils.MapHelper;
 import fi.tamk.ratboyz.tamperecitybike.utils.ViewHider;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener {
 
     private static final int REQUEST_CODE_LOCATION = 1;
+    private static final int REQUEST_CODE_LOGIN = 2;
     private GoogleMap mMap;
+    GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +56,28 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         FragmentManager fmanager = getSupportFragmentManager();
         SupportMapFragment fragment = (SupportMapFragment) (fmanager.findFragmentById(R.id.mapFragment));
         fragment.getMapAsync(this);
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+
+        OptionalPendingResult<GoogleSignInResult> opr = Auth
+                .GoogleSignInApi
+                .silentSignIn(mGoogleApiClient);
+
+        if(!opr.isDone()) {
+            login();
+        }
+    }
+
+    private void login() {
+        Intent loginActivity = new Intent(this, LoginActivity.class);
+        startActivityForResult(loginActivity, REQUEST_CODE_LOGIN);
     }
 
     public void panToCurrentLocation(View v) {
@@ -113,5 +148,39 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ViewHider hider = new ViewHider(this);
         mMap.setOnMapClickListener(hider);
         mMap.setOnCameraMoveStartedListener(hider);
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        // TODO Figure out what to do with this lol
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // TODO Pull necessary user info from data.
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_logout:
+                Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                        new ResultCallback<Status>() {
+                            @Override
+                            public void onResult(Status status) {
+                                login();
+                            }
+                        });
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu. Adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.map_activity, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 }

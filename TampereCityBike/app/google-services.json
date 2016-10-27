@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "600996792989",
+    "project_id": "citybike-1475779796127"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:600996792989:android:4445c0e3131a2335",
+        "android_client_info": {
+          "package_name": "fi.tamk.ratboyz.tamperecitybike"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "600996792989-g6vblalvb76con6fcq824b8mseimjal4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "fi.tamk.ratboyz.tamperecitybike",
+            "certificate_hash": "67D63226AD4A681F582BBA8523495818AF022B28"
+          }
+        },
+        {
+          "client_id": "600996792989-ku0ug81tgtanjj063961fbl0393789t7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkS9sODx3h5PS6zWiKze_DFrPpl9pEvtQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
