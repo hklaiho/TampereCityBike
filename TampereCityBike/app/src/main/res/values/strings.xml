@@ -3,5 +3,4 @@
     <string name="message_error_network">There was an issue reaching the servers</string>
     <string name="message_location_info_permission_denied">Location info could not be used</string>
     <string name="message_enable_location_info">Enable location service to use this feature</string>
-    <string name="title_activity_login">Sign in</string>
 </resources>
