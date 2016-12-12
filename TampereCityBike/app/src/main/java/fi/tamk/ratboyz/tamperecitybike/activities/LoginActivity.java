@@ -2,6 +2,7 @@ package fi.tamk.ratboyz.tamperecitybike.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Debug;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -40,7 +41,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         OptionalPendingResult<GoogleSignInResult> opr = Auth
                 .GoogleSignInApi
                 .silentSignIn(mGoogleApiClient);
-        // Automatically sign in
+        // Automatically sign in if user is already logged in.
         if (opr.isDone()) {
             GoogleSignInResult result = opr.get();
             handleSignInResult(result);
@@ -50,7 +51,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        // TODO Figure out what to do with this lol
+
     }
 
     public void signInGooglePlay() {
@@ -70,9 +71,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
-            // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
-            // TODO Pass arguments required by the map fragment.
             finish();
         }
     }

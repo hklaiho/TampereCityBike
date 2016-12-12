@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -10,18 +10,28 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="FloatingActionButton" parent="AppTheme">
+
+    <style name="AppTheme.FloatingActionButton" parent="AppTheme">
         <item name="android:layout_margin">@dimen/fab_margin</item>
     </style>
 
-    <style name="FloatingActionButton.Primary" parent="FloatingActionButton">
+    <style name="AppTheme.FloatingActionButton.Primary" parent="AppTheme.FloatingActionButton">
         <item name="android:layout_gravity">bottom|end</item>
         <item name="android:layout_alignParentBottom">true</item>
         <item name="android:layout_alignParentEnd">true</item>
     </style>
 
-    <style name="FloatingActionButton.Secondary" parent="AppTheme">
+    <!-- This may be commented out if the color scheme of the actionbar is to be changed.
+    This will set text and buttons to white regardless of the background color -->
+    <style name="AppTheme.ActionBar" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+    </style>
+
+    <style name="AppTheme.FloatingActionButton.Secondary" parent="AppTheme">
         <item name="android:layout_marginBottom">0dp</item>
         <item name="android:layout_marginRight">@dimen/fab_margin</item>
+    </style>
+
+    <style name="AppTheme.BottomSheet" parent="AppTheme">
+        <item name="android:background">?android:colorBackgroundFloating</item>
     </style>
 </resources>

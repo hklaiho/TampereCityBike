@@ -16,7 +16,7 @@ public class MapHelper {
     public static void setMapControls(GoogleMap map) {
         map.getUiSettings().setRotateGesturesEnabled(true);
         map.getUiSettings().setMapToolbarEnabled(false);
-        map.getUiSettings().setMyLocationButtonEnabled(false);
+        map.getUiSettings().setMyLocationButtonEnabled(true);
     }
 
     public static void centerOnLastKnownPos(GoogleMap map, Resources res) {

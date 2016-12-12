@@ -10,15 +10,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="fi.tamk.ratboyz.tamperecitybike.activities.LoginActivity">
 
-    <!-- Login progress -->
-    <ProgressBar
-        android:id="@+id/login_progress"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:visibility="gone" />
-
     <RelativeLayout
         android:id="@+id/email_login_form"
         android:layout_width="match_parent"
@@ -30,8 +21,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"
-            android:onClick="signInGooglePlay"/>
+            android:layout_centerHorizontal="true"/>
 
     </RelativeLayout>
 

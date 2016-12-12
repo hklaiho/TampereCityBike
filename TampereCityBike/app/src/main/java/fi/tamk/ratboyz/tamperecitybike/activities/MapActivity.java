@@ -1,6 +1,7 @@
 package fi.tamk.ratboyz.tamperecitybike.activities;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,6 +12,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
@@ -36,23 +39,34 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
+
+import java.util.List;
 
 import fi.tamk.ratboyz.tamperecitybike.R;
+import fi.tamk.ratboyz.tamperecitybike.interfaces.APIResponse;
+import fi.tamk.ratboyz.tamperecitybike.utils.BottomSheetUtility;
 import fi.tamk.ratboyz.tamperecitybike.utils.MapHelper;
 import fi.tamk.ratboyz.tamperecitybike.utils.ViewHider;
+import fi.tamk.ratboyz.tamperecitybike.viewmodels.NoteViewModel;
 
-public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener {
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleMap.OnMarkerClickListener {
 
     private static final int REQUEST_CODE_LOCATION = 1;
     private static final int REQUEST_CODE_LOGIN = 2;
     private GoogleMap mMap;
+    private BottomSheetBehavior bottomSheetBehavior;
+    private BottomSheetUtility bottomSheetUtility;
     GoogleApiClient mGoogleApiClient;
+    private FloatingActionButton fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        this.fab = (FloatingActionButton) findViewById(R.id.floating_action_button_location);
+        fab.hide();
         FragmentManager fmanager = getSupportFragmentManager();
         SupportMapFragment fragment = (SupportMapFragment) (fmanager.findFragmentById(R.id.mapFragment));
         fragment.getMapAsync(this);
@@ -69,10 +83,19 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         OptionalPendingResult<GoogleSignInResult> opr = Auth
                 .GoogleSignInApi
                 .silentSignIn(mGoogleApiClient);
-
-        if(!opr.isDone()) {
+        if (!opr.isDone()) {
             login();
         }
+
+        bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.bottomSheetContainer));
+        bottomSheetUtility = new BottomSheetUtility(bottomSheetBehavior, this);
+        bottomSheetBehavior.setBottomSheetCallback(bottomSheetUtility);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        bottomSheetUtility.hideBottomSheet();
     }
 
     private void login() {
@@ -145,9 +168,32 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         MapHelper.setMapControls(mMap);
         MapHelper.centerOnLastKnownPos(mMap, getResources());
         mMap.setMapStyle(new MapStyleOptions(getResources().getString(R.string.map_style_json)));
-        ViewHider hider = new ViewHider(this);
+        final ViewHider hider = new ViewHider(this, bottomSheetUtility);
         mMap.setOnMapClickListener(hider);
+        mMap.setOnMarkerClickListener(this);
         mMap.setOnCameraMoveStartedListener(hider);
+        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+                fab.show();
+                hider.onMapLongClick(latLng);
+            }
+        });
+        NoteViewModel.getAll(new APIResponse<List<NoteViewModel>>() {
+            @Override
+            public void onSuccess(List<NoteViewModel> notes) {
+
+            }
+
+            @Override
+            public void onFailure() {
+                Toast.makeText(
+                        MapActivity.this,
+                        getResources().getString(R.string.message_error_network),
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
     }
 
     @Override
@@ -158,7 +204,14 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        // TODO Pull necessary user info from data.
+
+        if (requestCode == Activity.RESULT_OK) {
+            switch (requestCode) {
+                case REQUEST_CODE_LOGIN:
+                    // TODO Pull info from shared prefs or something
+                    break;
+            }
+        }
     }
 
     @Override
@@ -182,5 +235,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         // Inflate the menu. Adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.map_activity, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!bottomSheetUtility.shouldConsumeBackPressedEvent())
+            super.onBackPressed();
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        bottomSheetUtility.showBottomSheet();
+        fab.hide();
+        return false;
     }
 }
