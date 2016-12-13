@@ -1,8 +1,5 @@
 package fi.tamk.ratboyz.tamperecitybike;
 
-/**
- * Created by Käyttäjä on 9.12.2016.
- */
 
 public class Config {
 
